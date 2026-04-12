@@ -88,3 +88,135 @@ smtplib and secure password hashing (Werkzeug).
 (3NF) to the MySQL schema to prevent data redundancy, grounded in 
 standard Database Management System (DBMS) academic 
 principles.
+Backend :
+principles.
+principles.
+
+Backend :
+🧑‍💻 1. Admin Creates Event (React Admin Dashboard)
+The admin logs into the system (future scope: authentication).
+Using the dashboard UI (built in React), they fill:
+Event Name
+Date & Time
+Location
+College (GMIT / GMU)
+Description
+
+👉 When they click “Create Event”:
+
+A POST request is sent to backend:
+POST /api/events/create
+
+👉 Backend stores this in MongoDB
+
+📌 Why this matters:
+
+No more WhatsApp messages scattered everywhere
+Everything is stored in one place → centralization begins here
+🗄️ 2. Backend Stores Event in MongoDB
+The backend (Node.js + Express) receives the request
+It uses a Mongoose model (Event.js)
+
+Example:
+
+{
+  "title": "Hackathon",
+  "date": "2026-04-20",
+  "college": "GMIT"
+}
+
+👉 Stored in MongoDB collection: events
+
+📌 Why MongoDB?
+
+Flexible (easy to add new fields later)
+Fast for real-time apps
+Scalable for large student data
+🎓 3. Students Browse Events (React UI)
+Students open the app
+React fetches data:
+GET /api/events
+Events are displayed with:
+Filters (GMIT / GMU)
+Search
+Categories
+
+📌 Impact:
+
+No confusion
+No missed events
+Everything visible in one dashboard
+🖱️ 4. Student Clicks “Register”
+
+When a student clicks register:
+
+👉 Frontend sends:
+
+POST /api/tickets/register
+
+With:
+
+{
+  "userId": "123",
+  "eventId": "456"
+}
+⚙️ 5. Backend Processing (MAIN LOGIC)
+
+This is the most important part 💥
+
+🔹 Step 1: Generate Unique ID
+const uniqueId = `${userId}-${eventId}-${Date.now()}`;
+
+👉 This ensures:
+
+No duplicate tickets
+Each student gets a unique identity
+🔹 Step 2: Create QR Code
+const qr = await QRCode.toDataURL(uniqueId);
+
+👉 QR contains:
+
+Unique ID
+Acts as digital ticket
+🔹 Step 3: Save Ticket in Database
+{
+  "userId": "123",
+  "eventId": "456",
+  "qrCode": "base64-image",
+  "status": "Registered"
+}
+
+👉 Stored in tickets collection
+
+📧 6. Email Sent with QR Code
+
+Using nodemailer:
+
+Student receives:
+Event details
+QR code (ticket)
+
+📌 Why important:
+
+Acts as digital proof
+Reduces no-shows
+No need for paper tickets
+🎟️ 7. Admin Scans QR at Event
+
+At event venue:
+
+Admin uses scanner (future: mobile camera)
+QR is scanned
+Backend verifies:
+GET /api/tickets/verify/:id
+
+👉 If valid:
+
+Entry allowed
+Status updated → "Present"
+
+📌 Benefit:
+
+Fast entry (seconds)
+No manual checking
+No fake entries
